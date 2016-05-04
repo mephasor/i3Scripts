@@ -1,7 +1,6 @@
 #!/usr/bin/python3.5
 
 import urllib.request
-import xml.etree.ElementTree as ET
 import re
 import subprocess
 
@@ -9,13 +8,14 @@ def setAsWallpaper(url):
     subprocess.call("feh --bg-scale "+url, shell=True)
 
 def getImgUrl(content):
-    root = ET.fromstring(content)
-    # Some magic numbers to get the first post in the feed
-    post = root[0][7][7].attrib['url']
-    return post
+    pattern = '"url":"(.*)","url';
+    p = re.compile(pattern)
+    result = re.search(p, content)
+    return('http://www.bing.com/'+result.groups()[0])
+
 
 def main():
-    src = 'https://api.flickr.com/services/feeds/groups_pool.gne?id=40961104@N00&lang=en-us&format=rss_200'
+    src = 'http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1'
     req = urllib.request.Request(
         src,
         data=None,
@@ -24,8 +24,9 @@ def main():
                                'Safari/537.36')}
     )
     with urllib.request.urlopen(req) as response:
-        xml = response.read()
-        url = getImgUrl(xml);
+        content = response.read()
+        url = getImgUrl(str(content));
+        # print(url)
         setAsWallpaper(url)
 
 if __name__ == "__main__":
